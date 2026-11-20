@@ -1,4 +1,4 @@
-namespace TaskTracker;
+﻿namespace TaskTracker;
 
 public enum Column { Backlog, Todo, InProgress, Review, Done }
 
@@ -19,6 +19,19 @@ public class TaskCard
     public DateTime CreatedAt;
     public DateTime StartedAt;
     public DateTime DoneAt;         // MinValue - ще не закрита
+
+    // рядок картки для дошки, пошуку і стендапу: "TT-101 Назва @хто (3 sp) [blocked]"
+    public string Describe()
+    {
+        string line = Key + " " + Title;
+        if (Assignee != null)
+            line += " @" + Assignee;
+        if (Points > 0)
+            line += " (" + Points + " sp)";
+        if (Blocked)
+            line += " [blocked]";
+        return line;
+    }
 }
 
 public class User

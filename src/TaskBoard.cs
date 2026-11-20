@@ -322,14 +322,7 @@ public class TaskBoard
             {
                 if (c.Column != col)
                     continue;
-                string line = "    " + c.Key + " " + c.Title;
-                if (c.Assignee != null)
-                    line += " @" + c.Assignee;
-                if (c.Points > 0)
-                    line += " (" + c.Points + " sp)";
-                if (c.Blocked)
-                    line += " [blocked]";
-                Console.WriteLine(line);
+                Console.WriteLine("    " + c.Describe());
             }
         }
     }
