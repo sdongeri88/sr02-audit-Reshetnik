@@ -242,27 +242,15 @@ public class TaskBoard
         User user = FindActiveUserOrFail(who);
         if (user == null)
             return false;
-        if (BusyCount(user.Login) >= PersonalWipLimit)
+        if (repo.CountInWork(user.Login) >= PersonalWipLimit)
         {
-            LastError = user.Name + " already has " + BusyCount(user.Login) + " task(s) in work";
+            LastError = user.Name + " already has " + repo.CountInWork(user.Login)
+                + " task(s) in work";
             return false;
         }
         task.Assignee = user.Login;
         Notify(user.Login, task.Key + " was assigned to you");
         return true;
-    }
-
-    // задачі людини в роботі (In progress + Review)
-    public int BusyCount(string who)
-    {
-        int n = 0;
-        foreach (TaskCard c in repo.Tasks)
-        {
-            if (c.Assignee == who && (c.Column == Column.InProgress
-                || c.Column == Column.Review))
-                n++;
-        }
-        return n;
     }
 
     // ================= файл =================

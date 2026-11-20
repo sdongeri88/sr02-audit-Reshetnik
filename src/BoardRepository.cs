@@ -1,4 +1,4 @@
-namespace TaskTracker;
+﻿namespace TaskTracker;
 
 // Сховище в пам'яті; демо-дані - дошка команди Falcon
 public class BoardRepository
@@ -40,6 +40,19 @@ public class BoardRepository
         t.CreatedAt = DateTime.Today.AddDays(-age);
         Tasks.Add(t);
         return t;
+    }
+
+    // задачі людини в роботі (In progress + Review)
+    public int CountInWork(string login)
+    {
+        int n = 0;
+        foreach (TaskCard c in Tasks)
+        {
+            if (c.Assignee == login && (c.Column == Column.InProgress
+                || c.Column == Column.Review))
+                n++;
+        }
+        return n;
     }
 
     public TaskCard FindTask(int id)
