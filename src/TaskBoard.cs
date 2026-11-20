@@ -1,4 +1,4 @@
-namespace TaskTracker;
+﻿namespace TaskTracker;
 
 // Дошка команди. Спершу тут був лише Move
 public class TaskBoard
@@ -46,9 +46,15 @@ public class TaskBoard
         t.Priority = prio < 1 || prio > 4 ? 3 : prio;
         t.Tags = tags == null ? "" : tags.ToLower();
         t.Reporter = by;
-        t.CreatedAt = DateTime.Now;
+        t.CreatedAt = Now();
         repo.Tasks.Add(t);
         return t;
+    }
+
+    // Шов для тестів (СР2): поточний час можна підмінити в нащадку
+    protected virtual DateTime Now()
+    {
+        return DateTime.Now;
     }
 
     // Переносить картку (drag&drop). false - див. LastError
@@ -87,7 +93,7 @@ public class TaskBoard
         if (expedite)
         {
             // поки є черговий; WIP не дивимось
-            if (DateTime.Now.Hour >= 19)
+            if (Now().Hour >= 19)
             {
                 LastError = "expedite lane is closed after 19:00";
                 return false;
@@ -112,7 +118,7 @@ public class TaskBoard
         {
             if (t.Assignee == null)
                 t.Assignee = u.Login;       // хто взяв, той і робить
-            t.StartedAt = DateTime.Now;
+            t.StartedAt = Now();
         }
         if (to == Column.Done)
         {
@@ -128,7 +134,7 @@ public class TaskBoard
                 LastError = "author cannot accept own task " + t.Key;
                 return false;
             }
-            t.DoneAt = DateTime.Now;
+            t.DoneAt = Now();
         }
         //if (from == Column.Done)
         //    t.DoneAt = DateTime.MinValue;   // reopen - спитати Олену
@@ -139,7 +145,7 @@ public class TaskBoard
         h.From = from;
         h.To = to;
         h.By = u.Login;
-        h.At = DateTime.Now;
+        h.At = Now();
         repo.History.Add(h);
         Notify(t.Assignee, MoveNotice(t, from, to));
         return true;
