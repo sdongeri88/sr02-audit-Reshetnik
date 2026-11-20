@@ -276,12 +276,17 @@ public class TaskBoard
             case Column.Review:
                 return t.Key + " is in the review queue (" + t.Points + " sp)";
             case Column.Done:
-                string s = t.Key + " is accepted, thanks!";
-                if (t.Priority == 1)
-                    s += " Critical - keep an eye on prod.";
-                return s;
+                return DoneNotice(t);
         }
         return null;
+    }
+
+    private static string DoneNotice(TaskCard t)
+    {
+        string s = t.Key + " is accepted, thanks!";
+        if (t.Priority == 1)
+            s += " Critical - keep an eye on prod.";
+        return s;
     }
 
     // ================= звіти і пошук =================
