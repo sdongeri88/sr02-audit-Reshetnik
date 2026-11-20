@@ -11,6 +11,13 @@ public class SprintReport
         { 3, 20 },
     };
 
+    private const int LowPriorityScore = 5;
+    private const int BugBonus = 30;
+    private const int BlockedBonus = 40;
+    private const int ReviewBonus = 15;
+    private const int StaleAfterDays = 14;
+    private const int HotScore = 50;
+
     private BoardRepository repo;
 
     public SprintReport(BoardRepository repo)
@@ -21,15 +28,15 @@ public class SprintReport
     // "температура" картки: що обговорюємо першим
     public int Score(TaskCard c)
     {
-        int s = PriorityScore.TryGetValue(c.Priority, out int byPriority) ? byPriority : 5;
+        int s = PriorityScore.TryGetValue(c.Priority, out int byPriority) ? byPriority : LowPriorityScore;
         if (c.Tags.Contains("bug"))
-            s += 30;
+            s += BugBonus;
         if (c.Blocked)
-            s += 40;            // blockers first
+            s += BlockedBonus;  // blockers first
         if (c.Column == Column.Review)
-            s += 15;
+            s += ReviewBonus;
         int age = (DateTime.Today - c.CreatedAt.Date).Days;
-        if (age > 14)
+        if (age > StaleAfterDays)
             s += age;           // давні задачі піднімаємо
         return s;
     }
@@ -39,7 +46,7 @@ public class SprintReport
     {
         foreach (TaskCard c in repo.Tasks)
         {
-            if (c.Column == Column.Done || c.Column == Column.Backlog || Score(c) < 50)
+            if (c.Column == Column.Done || c.Column == Column.Backlog || Score(c) < HotScore)
                 continue;
             Console.Write("  [" + Score(c) + "]");
             Console.WriteLine(" " + c.Describe());
