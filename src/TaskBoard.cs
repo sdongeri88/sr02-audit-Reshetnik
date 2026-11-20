@@ -85,30 +85,8 @@ public class TaskBoard
             LastError = "cannot close " + task.Key + " straight from Backlog";
             return false;
         }
-        if (expedite)
-        {
-            // поки є черговий; WIP не дивимось
-            if (Now().Hour >= ExpediteClosingHour)
-            {
-                LastError = "expedite lane is closed after 19:00";
-                return false;
-            }
-        }
-        else if (WipLimits.ContainsKey(to))
-        {
-            // заблоковані в ліміт не рахуються
-            int inColumn = 0;
-            foreach (TaskCard card in repo.Tasks)
-            {
-                if (card.Column == to)
-                    inColumn++;
-            }
-            if (inColumn >= WipLimits[to])
-            {
-                LastError = "WIP limit " + WipLimits[to] + " reached in " + to;
-                return false;
-            }
-        }
+        if (!IsLaneOpen(to, expedite))
+            return false;
         if (to == Column.InProgress)
         {
             if (task.Assignee == null)
@@ -142,6 +120,25 @@ public class TaskBoard
         repo.History.Add(entry);
         Notify(task.Assignee, MoveNotice(task, from, to));
         return true;
+    }
+
+    // експрес-смуга працює, поки є черговий, і не дивиться на WIP;
+    // звичайна смуга впирається в ліміт колонки
+    private bool IsLaneOpen(Column to, bool expedite)
+    {
+        if (expedite && Now().Hour >= ExpediteClosingHour)
+        {
+            LastError = "expedite lane is closed after 19:00";
+            return false;
+        }
+        if (expedite || !WipLimits.ContainsKey(to))
+            return true;
+        // заблоковані в ліміт не рахуються
+        int inColumn = repo.Tasks.Count(card => card.Column == to);
+        if (inColumn < WipLimits[to])
+            return true;
+        LastError = "WIP limit " + WipLimits[to] + " reached in " + to;
+        return false;
     }
 
     // спільні кроки Move і Assign: false/null - причина в LastError
