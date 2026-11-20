@@ -67,23 +67,12 @@ public class TaskBoard
     public bool Move(int id, Column to, string who, bool expedite)
     {
         LastError = null;
-        TaskCard task = repo.FindTask(id);
+        TaskCard task = FindTaskOrFail(id);
         if (task == null)
-        {
-            LastError = "task #" + id + " not found";
             return false;
-        }
-        User mover = null;
-        foreach (User user in Users)
-        {
-            if (user.Login == who.Trim().ToLower())
-                mover = user;
-        }
-        if (mover == null || !mover.Active)
-        {
-            LastError = "unknown or inactive user '" + who + "'";
+        User mover = FindActiveUserOrFail(who);
+        if (mover == null)
             return false;
-        }
         Column from = task.Column;
         if (task.Blocked)
         {
@@ -155,6 +144,26 @@ public class TaskBoard
         return true;
     }
 
+    // спільні кроки Move і Assign: false/null - причина в LastError
+    private TaskCard FindTaskOrFail(int id)
+    {
+        TaskCard task = repo.FindTask(id);
+        if (task == null)
+            LastError = "task #" + id + " not found";
+        return task;
+    }
+
+    private User FindActiveUserOrFail(string who)
+    {
+        User user = FindUser(who);
+        if (user == null || !user.Active)
+        {
+            LastError = "unknown or inactive user '" + who + "'";
+            return null;
+        }
+        return user;
+    }
+
     // порожня причина = зняти блок
     public bool Block(int id, string reason)
     {
@@ -197,23 +206,12 @@ public class TaskBoard
     public bool Assign(int id, string who)
     {
         LastError = null;
-        TaskCard task = repo.FindTask(id);
+        TaskCard task = FindTaskOrFail(id);
         if (task == null)
-        {
-            LastError = "task #" + id + " not found";
             return false;
-        }
-        User user = null;
-        foreach (User candidate in Users)
-        {
-            if (candidate.Login == who.Trim().ToLower())
-                user = candidate;
-        }
-        if (user == null || !user.Active)
-        {
-            LastError = "unknown or inactive user '" + who + "'";
+        User user = FindActiveUserOrFail(who);
+        if (user == null)
             return false;
-        }
         if (BusyCount(user.Login) >= PersonalWipLimit)
         {
             LastError = user.Name + " already has " + BusyCount(user.Login) + " task(s) in work";
