@@ -333,6 +333,16 @@ public class TaskBoard
         return n == 0 ? 0 : sum / n;
     }
 
+    // @логін, #тег або шматок назви (запит уже в нижньому регістрі)
+    private static bool Matches(TaskCard c, string q)
+    {
+        if (q.StartsWith("@"))
+            return c.Assignee == q.Substring(1);
+        if (q.StartsWith("#"))
+            return c.Tags.Contains(q.Substring(1));
+        return c.Title.ToLower().Contains(q);
+    }
+
     // @логін, #тег або шматок назви
     public List<TaskCard> Search(string q)
     {
@@ -343,17 +353,7 @@ public class TaskBoard
         recentQueries.Add(q);
         foreach (TaskCard c in repo.Tasks)
         {
-            if (q.StartsWith("@"))
-            {
-                if (c.Assignee == q.Substring(1))
-                    res.Add(c);
-            }
-            else if (q.StartsWith("#"))
-            {
-                if (c.Tags.Contains(q.Substring(1)))
-                    res.Add(c);
-            }
-            else if (c.Title.ToLower().Contains(q))
+            if (Matches(c, q))
                 res.Add(c);
         }
         return res;
