@@ -48,9 +48,8 @@ public class BoardRepository
         int n = 0;
         foreach (TaskCard c in Tasks)
         {
-            if (c.Assignee == login && (c.Column == Column.InProgress
-                || c.Column == Column.Review))
-                n++;
+            bool inWork = c.Column == Column.InProgress || c.Column == Column.Review;
+            n += c.Assignee == login && inWork ? 1 : 0;
         }
         return n;
     }

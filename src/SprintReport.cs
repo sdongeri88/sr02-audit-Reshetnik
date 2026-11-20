@@ -46,7 +46,8 @@ public class SprintReport
     {
         foreach (TaskCard c in repo.Tasks)
         {
-            if (c.Column == Column.Done || c.Column == Column.Backlog || Score(c) < HotScore)
+            bool offBoard = c.Column == Column.Done || c.Column == Column.Backlog;
+            if (offBoard || Score(c) < HotScore)
                 continue;
             Console.Write("  [" + Score(c) + "]");
             Console.WriteLine(" " + c.Describe());
