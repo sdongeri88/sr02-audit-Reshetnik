@@ -1,4 +1,6 @@
-﻿namespace TaskTracker;
+﻿using System.Diagnostics;
+
+namespace TaskTracker;
 
 // Сховище в пам'яті; демо-дані - дошка команди Falcon
 public class BoardRepository : ITaskSource
@@ -28,6 +30,9 @@ public class BoardRepository : ITaskSource
 
     public TaskCard Add(CardSeed seed)
     {
+        // неявна передумова: ідентифікатори демо-карток унікальні й менші за nextId
+        Debug.Assert(FindTask(seed.Id) == null, "duplicate card id " + seed.Id);
+        Debug.Assert(seed.Id < nextId, "demo id must be below nextId");
         TaskCard t = new TaskCard();
         t.Id = seed.Id;
         t.Key = "TT-" + seed.Id;
