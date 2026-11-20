@@ -208,7 +208,7 @@ public class TaskBoard
     }
 
     // ================= люди =================
-    public List<User> Users => team.All;
+    public IReadOnlyList<User> Users => team.All;
 
     public bool AddUser(string login, string name, string role)
     {

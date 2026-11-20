@@ -5,7 +5,8 @@ public class UserDirectory
 {
     private readonly List<User> users = new List<User>();
 
-    public List<User> All => users;
+    // назовні - лише читання: додають учасників тільки через Add з перевірками
+    public IReadOnlyList<User> All => users.AsReadOnly();
 
     public bool Add(string login, string name, string role)
     {
