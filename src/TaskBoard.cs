@@ -3,12 +3,18 @@
 // Дошка команди. Спершу тут був лише Move
 public class TaskBoard
 {
+    private const int TodoWipLimit = 6;
+    private const int InProgressWipLimit = 3;
+    private const int ReviewWipLimit = 2;
+    private const int PersonalWipLimit = 2;     // задач у роботі на одну людину
+    private const int ExpediteClosingHour = 19; // після цієї години експрес-смуга закрита
+    private const int SmallTaskPoints = 1;      // такі задачі можна закривати без рев'ю
+
     private BoardRepository repo;
     public Dictionary<Column, int> WipLimits = new Dictionary<Column, int>();
     public string LastError;            // причина останньої відмови
     // --- люди ---
     public List<User> Users = new List<User>();
-    private int personalLimit = 2;      // max 3 задачі на людину
     // --- збереження у файл ---
     public string DataFile = Path.Combine(Path.GetTempPath(), "falcon_board.txt");
     private int save_no;
@@ -22,9 +28,9 @@ public class TaskBoard
     public TaskBoard(BoardRepository repo)
     {
         this.repo = repo;
-        WipLimits.Add(Column.Todo, 6);
-        WipLimits.Add(Column.InProgress, 3);
-        WipLimits.Add(Column.Review, 2);
+        WipLimits.Add(Column.Todo, TodoWipLimit);
+        WipLimits.Add(Column.InProgress, InProgressWipLimit);
+        WipLimits.Add(Column.Review, ReviewWipLimit);
         // TODO: load the team from HR system
         AddUser("olena", "Olena Kravets", "lead");
         AddUser("ivan", "Ivan Moroz", "dev");
@@ -93,7 +99,7 @@ public class TaskBoard
         if (expedite)
         {
             // поки є черговий; WIP не дивимось
-            if (Now().Hour >= 19)
+            if (Now().Hour >= ExpediteClosingHour)
             {
                 LastError = "expedite lane is closed after 19:00";
                 return false;
@@ -123,7 +129,7 @@ public class TaskBoard
         if (to == Column.Done)
         {
             // рев'ю обов'язкове, крім дрібниць на 1 sp
-            if (from != Column.Review && t.Points > 1)
+            if (from != Column.Review && t.Points > SmallTaskPoints)
             {
                 LastError = t.Key + " must go through Review";
                 return false;
@@ -208,7 +214,7 @@ public class TaskBoard
             LastError = "unknown or inactive user '" + who + "'";
             return false;
         }
-        if (busyCount(u.Login) >= personalLimit)
+        if (busyCount(u.Login) >= PersonalWipLimit)
         {
             LastError = u.Name + " already has " + busyCount(u.Login) + " task(s) in work";
             return false;
