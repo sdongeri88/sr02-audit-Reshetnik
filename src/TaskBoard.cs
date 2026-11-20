@@ -95,18 +95,8 @@ public class TaskBoard
         }
         if (to == Column.Done)
         {
-            // рев'ю обов'язкове, крім дрібниць на 1 sp
-            if (from != Column.Review && task.Points > SmallTaskPoints)
-            {
-                LastError = task.Key + " must go through Review";
+            if (!CanAccept(task, from, who))
                 return false;
-            }
-            // автор сам собі задачу не приймає
-            if (who == task.Assignee)
-            {
-                LastError = "author cannot accept own task " + task.Key;
-                return false;
-            }
             task.DoneAt = Now();
         }
         task.Column = to;
@@ -139,6 +129,33 @@ public class TaskBoard
             return true;
         LastError = "WIP limit " + WipLimits[to] + " reached in " + to;
         return false;
+    }
+
+    private bool CanAccept(TaskCard task, Column from, string who)
+    {
+        if (NeedsReview(task, from))
+        {
+            LastError = task.Key + " must go through Review";
+            return false;
+        }
+        if (IsOwnTask(task, who))
+        {
+            LastError = "author cannot accept own task " + task.Key;
+            return false;
+        }
+        return true;
+    }
+
+    // рев'ю обов'язкове, крім дрібниць на 1 sp
+    private static bool NeedsReview(TaskCard task, Column from)
+    {
+        return from != Column.Review && task.Points > SmallTaskPoints;
+    }
+
+    // автор сам собі задачу не приймає
+    private static bool IsOwnTask(TaskCard task, string who)
+    {
+        return who == task.Assignee;
     }
 
     // спільні кроки Move і Assign: false/null - причина в LastError
