@@ -307,16 +307,16 @@ public class TaskBoard
         int[] cnt = new int[5];
         foreach (TaskCard c in repo.Tasks)
             cnt[(int)c.Column]++;
-        int sp = 0;
-        foreach (TaskCard c in repo.Tasks)
-        {
-            if (c.Column == Column.Done)
-                sp += c.Points;
-        }
         Console.WriteLine("  backlog " + cnt[0] + ", todo " + cnt[1] + ", in progress "
-            + cnt[2] + ", review " + cnt[3] + ", done " + cnt[4] + " (" + sp + " sp)");
+            + cnt[2] + ", review " + cnt[3] + ", done " + cnt[4] + " (" + DonePoints() + " sp)");
         Console.WriteLine("  avg lead time: " + AvgLeadTime() + " day(s), moves: "
             + MovesToday + ", searches: " + recentQueries.Count);
+    }
+
+    // story points закритих задач
+    private int DonePoints()
+    {
+        return repo.Tasks.Where(c => c.Column == Column.Done).Sum(c => c.Points);
     }
 
     // середній lead time у днях: від створення до Done
