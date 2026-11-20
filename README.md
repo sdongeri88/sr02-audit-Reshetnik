@@ -1,0 +1,35 @@
+# sr02-audit-Reshetnik
+
+Самостійна робота № 2 з дисципліни «Конструювання програмного забезпечення»:
+аудит якості та рефакторинг успадкованого коду.
+
+- Виконав: Решетнік Костянтин Валентинович, група 472.
+- Варіант 15 — TaskTracker. Модуль-донор і розрахунковий вузол: `TaskBoard.Move` (переміщення завдання
+  між колонками). Профільний дефект: клас-менеджер, що робить усе (низька зв'язність) → Extract Class,
+  Move Method.
+- Джерело коду: **А** — пакет викладача `V15-TaskTracker` з навчального репозиторію legacy-code,
+  598 фізичних і 403 логічні рядки, 5 файлів, 8 типів.
+
+## Структура
+
+    src/                    код, що аудитується (консольний застосунок .NET 8)
+    Legacy.Tests/           характеризаційні тести (xUnit)
+    docs/metrics-before.csv метрики методів до рефакторингу
+    docs/metrics-after.csv  метрики методів після рефакторингу
+    docs/defects.md         реєстр дефектів проєктування коду
+    docs/plan.md            план рефакторингу «вигода / ризик»
+    docs/decisions.md       журнал рішень
+    docs/debt.md            реєстр технічного боргу
+    docs/out-before.txt     вивід сценарію до рефакторингу
+    docs/out-after.txt      вивід сценарію після рефакторингу
+    tools/metrics.py        скрипт метрик (методика розділів М1–М3)
+
+Теги: `baseline` — вихідний код; `safety-net` — сітка тестів готова; `after-refactoring` — останній рефакторинг.
+
+## Як запустити
+
+    dotnet build Legacy.sln
+    dotnet test Legacy.sln
+    dotnet test Legacy.sln --collect:"XPlat Code Coverage"
+    dotnet run --project src
+    python tools/metrics.py src docs/metrics-after.csv
