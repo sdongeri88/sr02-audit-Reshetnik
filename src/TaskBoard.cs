@@ -16,8 +16,7 @@ public class TaskBoard
     // --- люди ---
     private readonly UserDirectory team = new UserDirectory();
     // --- збереження у файл ---
-    public string DataFile = Path.Combine(Path.GetTempPath(), "falcon_board.txt");
-    private int saveNumber;
+    private readonly BoardStorage storage = new BoardStorage();
     // --- сповіщення ---
     private readonly BoardNotifier notifier = new BoardNotifier();
     // --- статистика і пошук ---
@@ -240,27 +239,15 @@ public class TaskBoard
     }
 
     // ================= файл =================
-    public int Save()
+    public string DataFile
     {
-        saveNumber++;
-        List<string> lines = new List<string>();
-        lines.Add("#falcon v" + saveNumber);
-        foreach (TaskCard c in repo.Tasks)
-            lines.Add(ToStorageLine(c));
-        try
-        {
-            File.WriteAllLines(DataFile, lines);
-        }
-        catch (Exception) { }
-        return lines.Count - 1;
+        get => storage.DataFile;
+        set => storage.DataFile = value;
     }
 
-    public string ToStorageLine(TaskCard c)
+    public int Save()
     {
-        string s = c.Id + ";" + c.Key + ";" + c.Title.Replace(";", ",") + ";" + c.Column;
-        s += ";" + (c.Assignee == null ? "" : c.Assignee) + ";" + c.Points + ";" + c.Priority;
-        return s + ";" + c.Tags + ";" + (c.Blocked ? "1" : "0") + ";"
-            + c.CreatedAt.ToString("yyyy-MM-dd");
+        return storage.Save(repo.Tasks);
     }
 
     // ================= сповіщення =================
