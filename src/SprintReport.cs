@@ -1,4 +1,4 @@
-namespace TaskTracker;
+﻿namespace TaskTracker;
 
 // Звіти для стендапу (писав Андрій)
 public class SprintReport
@@ -26,7 +26,6 @@ public class SprintReport
             s += 40;            // blockers first
         if (c.Column == Column.Review)
             s += 15;
-        //if (c.Points == 0) s += 10;
         int age = (DateTime.Today - c.CreatedAt.Date).Days;
         if (age > 14)
             s += age;           // давні задачі піднімаємо
