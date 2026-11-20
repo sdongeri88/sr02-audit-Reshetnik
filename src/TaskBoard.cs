@@ -305,10 +305,11 @@ public class TaskBoard
     public void PrintStats()
     {
         int[] cnt = new int[5];
+        foreach (TaskCard c in repo.Tasks)
+            cnt[(int)c.Column]++;
         int sp = 0;
         foreach (TaskCard c in repo.Tasks)
         {
-            cnt[(int)c.Column]++;
             if (c.Column == Column.Done)
                 sp += c.Points;
         }
