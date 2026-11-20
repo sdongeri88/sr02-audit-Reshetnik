@@ -1,0 +1,69 @@
+=== Falcon team board ===
+tasks: 10, people: 5
+-- moves
+  refused #102 -> InProgress: WIP limit 3 reached in InProgress
+  >> @ivan: TT-105 is accepted, thanks!
+  ok      #105 -> Done by sofia
+  >> @ivan: TT-101 is in the review queue (3 sp)
+  ok      #101 -> Review by ivan
+  ok      #102 -> InProgress by Sofia
+  >> @team: TT-103 is planned: Dark theme for settings
+  ok      #103 -> Todo by olena
+-- rules (moves so far: 4)
+  refused #106 -> InProgress: TT-106 is blocked: waiting for bank sandbox keys
+  refused #110 -> Done: cannot close TT-110 straight from Backlog
+  refused #108 -> Done: author cannot accept own task TT-108
+  >> @taras: TT-108 is accepted, thanks! Critical - keep an eye on prod.
+  ok      #108 -> Done by Taras
+  refused #107 -> Done: TT-107 must go through Review
+-- invalid input
+  refused #110 -> Todo: unknown or inactive user 'petro'
+  refused #999 -> Todo: task #999 not found
+  crash   #110: NullReferenceException
+-- team
+  add nadia: True, role dev
+  >> @nadia: TT-110 was assigned to you
+  assign #110 to nadia: ok
+  assign #103 to taras: Taras Hnatiuk already has 2 task(s) in work
+  assign #103 to petro: unknown or inactive user 'petro'
+  assign #404 to ivan: task #404 not found
+  created TT-111 in Backlog, prio 3
+  >> @taras: TT-104 is blocked: build server disk is full
+  refused #106 -> InProgress: WIP limit 3 reached in InProgress
+-- search
+  '#ui':
+    TT-103 Dark theme for settings (2 sp)
+    TT-104 Build agents on .NET 8 @taras (3 sp) [blocked]
+    TT-108 Crash on avatar upload @taras (2 sp)
+  '@Taras':
+    TT-104 Build agents on .NET 8 @taras (3 sp) [blocked]
+    TT-107 Search by tag @taras (5 sp)
+    TT-108 Crash on avatar upload @taras (2 sp)
+  'crash':
+    TT-108 Crash on avatar upload @taras (2 sp)
+  '':
+-- board
+  Backlog:
+    TT-110 Rate limit for public API @nadia (5 sp)
+    TT-111 Two-factor login (8 sp)
+  Todo (WIP 6):
+    TT-103 Dark theme for settings (2 sp)
+    TT-106 Payment webhook retries (8 sp)
+  InProgress (WIP 3):
+    TT-102 Export board to CSV @sofia (5 sp)
+    TT-104 Build agents on .NET 8 @taras (3 sp) [blocked]
+    TT-107 Search by tag @taras (5 sp)
+  Review (WIP 2):
+    TT-101 Login page returns 500 @ivan (3 sp)
+  Done:
+    TT-105 Typo in welcome email @ivan (1 sp)
+    TT-108 Crash on avatar upload @taras (2 sp)
+    TT-109 Onboarding checklist @olena (3 sp)
+-- stats
+  backlog 2, todo 2, in progress 3, review 1, done 3 (6 sp)
+  avg lead time: 5 day(s), moves: 5, searches: 3
+-- standup
+  [145] TT-101 Login page returns 500 @ivan (3 sp)
+  [90] TT-104 Build agents on .NET 8 @taras (3 sp) [blocked]
+  [65] TT-106 Payment webhook retries (8 sp)
+-- saved 11 task(s), notifications: 6

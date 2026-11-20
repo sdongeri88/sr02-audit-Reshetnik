@@ -33,3 +33,19 @@
     dotnet test Legacy.sln --collect:"XPlat Code Coverage"
     dotnet run --project src
     python tools/metrics.py src docs/metrics-after.csv
+
+## Результат
+
+| Метрика | До (`baseline`) | Після (`after-refactoring`) | Ціль |
+|---|---|---|---|
+| Максимальна ЦС | 21 (`TaskBoard.Move`) | 7 | ≤ 8 |
+| Середня ЦС | 5,28 | 3,11 | ≤ 4 |
+| Найдовший метод, логічних рядків | 54 | 33 | ≤ 40 |
+| Максимальна вкладеність | 4 | 3 | ≤ 3 |
+| Клони ≥ 6 рядків | 2 групи | 0 | 0 |
+| Характеризаційних тестів | — | 43 (37 методів) | ≥ 10 |
+| Покриття рядків `TaskBoard` | — | 95,8 % | ≥ 60 % |
+
+24 кроки рефакторингу (16 різних прийомів), кожен окремим комітом `refactor(Клас): Rnn ...`.
+Докази незмінності поведінки: `git log -- Legacy.Tests` містить лише коміт сітки; ті самі 43 тести зелені
+на `safety-net` і `after-refactoring`; `docs/out-before.txt` і `docs/out-after.txt` однакові.
