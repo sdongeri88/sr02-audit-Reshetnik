@@ -1,11 +1,13 @@
 ﻿namespace TaskTracker;
 
 // Сховище в пам'яті; демо-дані - дошка команди Falcon
-public class BoardRepository
+public class BoardRepository : ITaskSource
 {
     public static int nextId = 111;     // 101-110 - демо-картки
     public List<TaskCard> Tasks = new List<TaskCard>();
     public List<HistoryEntry> History = new List<HistoryEntry>();
+
+    public IReadOnlyList<TaskCard> Cards => Tasks;
 
     public BoardRepository()
     {

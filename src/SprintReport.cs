@@ -18,11 +18,11 @@ public class SprintReport
     private const int StaleAfterDays = 14;
     private const int HotScore = 50;
 
-    private BoardRepository repo;
+    private readonly ITaskSource source;
 
-    public SprintReport(BoardRepository repo)
+    public SprintReport(ITaskSource source)
     {
-        this.repo = repo;
+        this.source = source;
     }
 
     // "температура" картки: що обговорюємо першим
@@ -44,7 +44,7 @@ public class SprintReport
     // hot cards for the standup: everything on the board with 50+
     public void PrintStandup()
     {
-        foreach (TaskCard c in repo.Tasks)
+        foreach (TaskCard c in source.Cards)
         {
             bool offBoard = c.Column == Column.Done || c.Column == Column.Backlog;
             if (offBoard || Score(c) < HotScore)
