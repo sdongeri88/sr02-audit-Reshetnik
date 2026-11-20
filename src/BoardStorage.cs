@@ -18,6 +18,7 @@ public class BoardStorage
         {
             File.WriteAllLines(DataFile, lines);
         }
+        // TODO TD-01: виняток запису ковтається, Save повертає кількість навіть без файлу
         catch (Exception) { }
         return lines.Count - 1;
     }

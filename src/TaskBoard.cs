@@ -1,6 +1,7 @@
 ﻿namespace TaskTracker;
 
 // Дошка команди. Спершу тут був лише Move
+// TODO TD-06: фасад делегує трьом класам, fan-out 8; розвести клієнтів напряму
 public class TaskBoard
 {
     private const int TodoWipLimit = 6;
@@ -12,6 +13,7 @@ public class TaskBoard
 
     private BoardRepository repo;
     public Dictionary<Column, int> WipLimits = new Dictionary<Column, int>();
+    // TODO TD-04: код помилки замість винятку; null у who дає NullReferenceException
     public string LastError;            // причина останньої відмови
     // --- люди ---
     private readonly UserDirectory team = new UserDirectory();
@@ -20,6 +22,7 @@ public class TaskBoard
     // --- сповіщення ---
     private readonly BoardNotifier notifier = new BoardNotifier();
     // --- статистика і пошук ---
+    // TODO TD-07: статичний змінюваний стан (MovesToday, nextId) спільний для всіх дошок
     public static int MovesToday;
     private List<string> recentQueries = new List<string>();
 
@@ -137,6 +140,7 @@ public class TaskBoard
         }
         if (expedite || !WipLimits.ContainsKey(to))
             return true;
+        // TODO TD-03: коментар нижче не відповідає коду - заблоковані теж рахуються
         // заблоковані в ліміт не рахуються
         int inColumn = repo.Tasks.Count(card => card.Column == to);
         if (inColumn < WipLimits[to])
@@ -169,6 +173,7 @@ public class TaskBoard
     // автор сам собі задачу не приймає
     private static bool IsOwnTask(TaskCard task, string who)
     {
+        // TODO TD-02: сире порівняння без Trim/ToLower - "Taras" приймає власну задачу
         return who == task.Assignee;
     }
 
@@ -349,6 +354,7 @@ public class TaskBoard
         if (q.StartsWith("@"))
             return c.Assignee == q.Substring(1);
         if (q.StartsWith("#"))
+            // TODO TD-05: пошук тегу підрядком - "#ui" знаходить і "build"; потрібен TagSet
             return c.Tags.Contains(q.Substring(1));
         return c.Title.ToLower().Contains(q);
     }

@@ -35,6 +35,7 @@ public class SprintReport
             s += BlockedBonus;  // blockers first
         if (c.Column == Column.Review)
             s += ReviewBonus;
+        // TODO TD-08: прямий DateTime.Today без шва - вік задачі не тестується детерміновано
         int age = (DateTime.Today - c.CreatedAt.Date).Days;
         if (age > StaleAfterDays)
             s += age;           // давні задачі піднімаємо

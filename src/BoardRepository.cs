@@ -5,6 +5,7 @@ namespace TaskTracker;
 // Сховище в пам'яті; демо-дані - дошка команди Falcon
 public class BoardRepository : ITaskSource
 {
+    // TODO TD-07: статичний лічильник ідентифікаторів - див. TaskBoard.MovesToday
     public static int nextId = 111;     // 101-110 - демо-картки
     public List<TaskCard> Tasks = new List<TaskCard>();
     public List<HistoryEntry> History = new List<HistoryEntry>();
@@ -43,6 +44,7 @@ public class BoardRepository : ITaskSource
         t.Priority = seed.Priority;
         t.Tags = seed.Tags;
         t.Reporter = "olena";
+        // TODO TD-08: DateTime.Today у демо-даних - див. SprintReport.Score
         t.CreatedAt = DateTime.Today.AddDays(-seed.AgeDays);
         Tasks.Add(t);
         return t;
