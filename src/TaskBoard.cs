@@ -74,6 +74,16 @@ public class TaskBoard
         if (mover == null)
             return false;
         Column from = task.Column;
+        if (!CanLeave(task, from, to) || !IsLaneOpen(to, expedite))
+            return false;
+        if (to == Column.Done && !CanAccept(task, from, who))
+            return false;
+        ApplyMove(task, from, to, mover);
+        return true;
+    }
+
+    private bool CanLeave(TaskCard task, Column from, Column to)
+    {
         if (task.Blocked)
         {
             LastError = task.Key + " is blocked: " + task.BlockReason;
@@ -85,22 +95,30 @@ public class TaskBoard
             LastError = "cannot close " + task.Key + " straight from Backlog";
             return false;
         }
-        if (!IsLaneOpen(to, expedite))
-            return false;
+        return true;
+    }
+
+    private void ApplyMove(TaskCard task, Column from, Column to, User mover)
+    {
         if (to == Column.InProgress)
-        {
-            if (task.Assignee == null)
-                task.Assignee = mover.Login;       // хто взяв, той і робить
-            task.StartedAt = Now();
-        }
+            StartWork(task, mover);
         if (to == Column.Done)
-        {
-            if (!CanAccept(task, from, who))
-                return false;
             task.DoneAt = Now();
-        }
         task.Column = to;
         MovesToday++;
+        RecordHistory(task, from, to, mover);
+        Notify(task.Assignee, MoveNotice(task, from, to));
+    }
+
+    private void StartWork(TaskCard task, User mover)
+    {
+        if (task.Assignee == null)
+            task.Assignee = mover.Login;       // хто взяв, той і робить
+        task.StartedAt = Now();
+    }
+
+    private void RecordHistory(TaskCard task, Column from, Column to, User mover)
+    {
         HistoryEntry entry = new HistoryEntry();
         entry.TaskId = task.Id;
         entry.From = from;
@@ -108,8 +126,6 @@ public class TaskBoard
         entry.By = mover.Login;
         entry.At = Now();
         repo.History.Add(entry);
-        Notify(task.Assignee, MoveNotice(task, from, to));
-        return true;
     }
 
     // експрес-смуга працює, поки є черговий, і не дивиться на WIP;
