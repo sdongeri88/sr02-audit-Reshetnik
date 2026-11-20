@@ -14,7 +14,7 @@ public class TaskBoard
     public Dictionary<Column, int> WipLimits = new Dictionary<Column, int>();
     public string LastError;            // причина останньої відмови
     // --- люди ---
-    public List<User> Users = new List<User>();
+    private readonly UserDirectory team = new UserDirectory();
     // --- збереження у файл ---
     public string DataFile = Path.Combine(Path.GetTempPath(), "falcon_board.txt");
     private int saveNumber;
@@ -208,29 +208,16 @@ public class TaskBoard
     }
 
     // ================= люди =================
+    public List<User> Users => team.All;
+
     public bool AddUser(string login, string name, string role)
     {
-        if (login == null || login.Trim() == "")
-            return false;
-        if (FindUser(login) != null)
-            return false;
-        User u = new User();
-        u.Login = login.Trim().ToLower();
-        u.Name = name;
-        // старі ролі ("developer", "backend") - це dev
-        u.Role = role == "lead" || role == "qa" ? role : "dev";
-        Users.Add(u);
-        return true;
+        return team.Add(login, name, role);
     }
 
     public User FindUser(string login)
     {
-        foreach (User u in Users)
-        {
-            if (u.Login == login.Trim().ToLower())
-                return u;
-        }
-        return null;
+        return team.Find(login);
     }
 
     public bool Assign(int id, string who)
