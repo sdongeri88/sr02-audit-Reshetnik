@@ -3,6 +3,14 @@
 // Звіти для стендапу (писав Андрій)
 public class SprintReport
 {
+    // базова "температура" за пріоритетом (1 - critical ... 4 - low)
+    private static readonly Dictionary<int, int> PriorityScore = new Dictionary<int, int>
+    {
+        { 1, 100 },
+        { 2, 50 },
+        { 3, 20 },
+    };
+
     private BoardRepository repo;
 
     public SprintReport(BoardRepository repo)
@@ -13,13 +21,7 @@ public class SprintReport
     // "температура" картки: що обговорюємо першим
     public int Score(TaskCard c)
     {
-        int s = 5;
-        if (c.Priority == 1)
-            s = 100;
-        else if (c.Priority == 2)
-            s = 50;
-        else if (c.Priority == 3)
-            s = 20;
+        int s = PriorityScore.TryGetValue(c.Priority, out int byPriority) ? byPriority : 5;
         if (c.Tags.Contains("bug"))
             s += 30;
         if (c.Blocked)
