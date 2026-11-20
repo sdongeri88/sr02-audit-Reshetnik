@@ -17,7 +17,7 @@ public class TaskBoard
     public List<User> Users = new List<User>();
     // --- збереження у файл ---
     public string DataFile = Path.Combine(Path.GetTempPath(), "falcon_board.txt");
-    private int save_no;
+    private int saveNumber;
     // --- сповіщення ---
     public List<string> Sent = new List<string>();
     public bool Quiet;                  // вмикається на час імпорту
@@ -67,33 +67,33 @@ public class TaskBoard
     public bool Move(int id, Column to, string who, bool expedite)
     {
         LastError = null;
-        TaskCard t = repo.FindTask(id);
-        if (t == null)
+        TaskCard task = repo.FindTask(id);
+        if (task == null)
         {
             LastError = "task #" + id + " not found";
             return false;
         }
-        User u = null;
-        foreach (User x in Users)
+        User mover = null;
+        foreach (User user in Users)
         {
-            if (x.Login == who.Trim().ToLower())
-                u = x;
+            if (user.Login == who.Trim().ToLower())
+                mover = user;
         }
-        if (u == null || !u.Active)
+        if (mover == null || !mover.Active)
         {
             LastError = "unknown or inactive user '" + who + "'";
             return false;
         }
-        Column from = t.Column;
-        if (t.Blocked)
+        Column from = task.Column;
+        if (task.Blocked)
         {
-            LastError = t.Key + " is blocked: " + t.BlockReason;
+            LastError = task.Key + " is blocked: " + task.BlockReason;
             return false;
         }
         // з беклогу одразу в Done не можна
         if (from == Column.Backlog && to == Column.Done)
         {
-            LastError = "cannot close " + t.Key + " straight from Backlog";
+            LastError = "cannot close " + task.Key + " straight from Backlog";
             return false;
         }
         if (expedite)
@@ -108,13 +108,13 @@ public class TaskBoard
         else if (WipLimits.ContainsKey(to))
         {
             // заблоковані в ліміт не рахуються
-            int cnt = 0;
-            foreach (TaskCard x in repo.Tasks)
+            int inColumn = 0;
+            foreach (TaskCard card in repo.Tasks)
             {
-                if (x.Column == to)
-                    cnt++;
+                if (card.Column == to)
+                    inColumn++;
             }
-            if (cnt >= WipLimits[to])
+            if (inColumn >= WipLimits[to])
             {
                 LastError = "WIP limit " + WipLimits[to] + " reached in " + to;
                 return false;
@@ -122,36 +122,36 @@ public class TaskBoard
         }
         if (to == Column.InProgress)
         {
-            if (t.Assignee == null)
-                t.Assignee = u.Login;       // хто взяв, той і робить
-            t.StartedAt = Now();
+            if (task.Assignee == null)
+                task.Assignee = mover.Login;       // хто взяв, той і робить
+            task.StartedAt = Now();
         }
         if (to == Column.Done)
         {
             // рев'ю обов'язкове, крім дрібниць на 1 sp
-            if (from != Column.Review && t.Points > SmallTaskPoints)
+            if (from != Column.Review && task.Points > SmallTaskPoints)
             {
-                LastError = t.Key + " must go through Review";
+                LastError = task.Key + " must go through Review";
                 return false;
             }
             // автор сам собі задачу не приймає
-            if (who == t.Assignee)
+            if (who == task.Assignee)
             {
-                LastError = "author cannot accept own task " + t.Key;
+                LastError = "author cannot accept own task " + task.Key;
                 return false;
             }
-            t.DoneAt = Now();
+            task.DoneAt = Now();
         }
-        t.Column = to;
+        task.Column = to;
         MovesToday++;
-        HistoryEntry h = new HistoryEntry();
-        h.TaskId = t.Id;
-        h.From = from;
-        h.To = to;
-        h.By = u.Login;
-        h.At = Now();
-        repo.History.Add(h);
-        Notify(t.Assignee, MoveNotice(t, from, to));
+        HistoryEntry entry = new HistoryEntry();
+        entry.TaskId = task.Id;
+        entry.From = from;
+        entry.To = to;
+        entry.By = mover.Login;
+        entry.At = Now();
+        repo.History.Add(entry);
+        Notify(task.Assignee, MoveNotice(task, from, to));
         return true;
     }
 
@@ -197,35 +197,35 @@ public class TaskBoard
     public bool Assign(int id, string who)
     {
         LastError = null;
-        TaskCard t = repo.FindTask(id);
-        if (t == null)
+        TaskCard task = repo.FindTask(id);
+        if (task == null)
         {
             LastError = "task #" + id + " not found";
             return false;
         }
-        User u = null;
-        foreach (User x in Users)
+        User user = null;
+        foreach (User candidate in Users)
         {
-            if (x.Login == who.Trim().ToLower())
-                u = x;
+            if (candidate.Login == who.Trim().ToLower())
+                user = candidate;
         }
-        if (u == null || !u.Active)
+        if (user == null || !user.Active)
         {
             LastError = "unknown or inactive user '" + who + "'";
             return false;
         }
-        if (busyCount(u.Login) >= PersonalWipLimit)
+        if (BusyCount(user.Login) >= PersonalWipLimit)
         {
-            LastError = u.Name + " already has " + busyCount(u.Login) + " task(s) in work";
+            LastError = user.Name + " already has " + BusyCount(user.Login) + " task(s) in work";
             return false;
         }
-        t.Assignee = u.Login;
-        Notify(u.Login, t.Key + " was assigned to you");
+        task.Assignee = user.Login;
+        Notify(user.Login, task.Key + " was assigned to you");
         return true;
     }
 
     // задачі людини в роботі (In progress + Review)
-    public int busyCount(string who)
+    public int BusyCount(string who)
     {
         int n = 0;
         foreach (TaskCard c in repo.Tasks)
@@ -240,11 +240,11 @@ public class TaskBoard
     // ================= файл =================
     public int Save()
     {
-        save_no++;
+        saveNumber++;
         List<string> lines = new List<string>();
-        lines.Add("#falcon v" + save_no);
+        lines.Add("#falcon v" + saveNumber);
         foreach (TaskCard c in repo.Tasks)
-            lines.Add(cardToLine(c));
+            lines.Add(ToStorageLine(c));
         try
         {
             File.WriteAllLines(DataFile, lines);
@@ -253,7 +253,7 @@ public class TaskBoard
         return lines.Count - 1;
     }
 
-    public string cardToLine(TaskCard c)
+    public string ToStorageLine(TaskCard c)
     {
         string s = c.Id + ";" + c.Key + ";" + c.Title.Replace(";", ",") + ";" + c.Column;
         s += ";" + (c.Assignee == null ? "" : c.Assignee) + ";" + c.Points + ";" + c.Priority;
