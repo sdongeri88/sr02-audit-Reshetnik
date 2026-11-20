@@ -19,8 +19,7 @@ public class TaskBoard
     public string DataFile = Path.Combine(Path.GetTempPath(), "falcon_board.txt");
     private int saveNumber;
     // --- сповіщення ---
-    public List<string> Sent = new List<string>();
-    public bool Quiet;                  // вмикається на час імпорту
+    private readonly BoardNotifier notifier = new BoardNotifier();
     // --- статистика і пошук ---
     public static int MovesToday;
     private List<string> recentQueries = new List<string>();
@@ -265,16 +264,18 @@ public class TaskBoard
     }
 
     // ================= сповіщення =================
+    public IReadOnlyList<string> Sent => notifier.Sent;
+
+    // вмикається на час імпорту
+    public bool Quiet
+    {
+        get => notifier.Quiet;
+        set => notifier.Quiet = value;
+    }
+
     public void Notify(string login, string text)
     {
-        if (text == null)
-            return;
-        string to = login ?? "team";
-        Sent.Add(to + ": " + text);
-        if (Quiet)
-            return;
-        // TODO: пошта/Slack, коли дадуть доступ
-        Console.WriteLine("  >> @" + to + ": " + text);
+        notifier.Notify(login, text);
     }
 
     public string MoveNotice(TaskCard t, Column from, Column to)
